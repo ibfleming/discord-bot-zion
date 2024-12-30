@@ -30,12 +30,12 @@ ytdl_opts = {
 }
 
 fetch_opts = {
-    "format": "bestaudio/best",  # Keeps the best audio format available
-    "extract_flat": True,  # Only extracts the URL and metadata, skips actual downloading
-    "quiet": False,  # Suppresses unnecessary logs
-    "force_ipv4": True,  # Force IPv4 to avoid possible issues with IPv6
-    "noplaylist": True,  # Skip playlist extraction (if you're only fetching a single video)
-    "outtmpl": "./music/%(title)s.%(ext)s",  # Adjust output template if you want
+    "format": "bestaudio/best",
+    "extract_flat": True,
+    "quiet": False,
+    "force_ipv4": True,
+    "noplaylist": True,
+    "outtmpl": "./music/%(title)s.%(ext)s",
 }
 
 
