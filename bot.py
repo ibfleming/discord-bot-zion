@@ -13,7 +13,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 # Discord Bot
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix=".", description="Music bot WIP.", intents=intents)
+bot = commands.Bot(command_prefix=".", intents=intents)
 
 # Youtube Downloader options
 ytdl_opts = {
@@ -26,12 +26,24 @@ ytdl_opts = {
         },
     ],
     "force_ipv4": True,
+    "outtmpl": "./music/%(title)s.%(ext)s",
 }
+
+fetch_opts = {
+    "format": "bestaudio/best",  # Keeps the best audio format available
+    "extract_flat": True,  # Only extracts the URL and metadata, skips actual downloading
+    "quiet": False,  # Suppresses unnecessary logs
+    "force_ipv4": True,  # Force IPv4 to avoid possible issues with IPv6
+    "noplaylist": True,  # Skip playlist extraction (if you're only fetching a single video)
+    "outtmpl": "./music/%(title)s.%(ext)s",  # Adjust output template if you want
+}
+
 
 # FFMPEG Options
 ffmpeg_options = {"options": "-vn"}
 
 # YoutubeDL instances
+fetch = youtube_dl.YoutubeDL(fetch_opts)
 ytdl = youtube_dl.YoutubeDL(ytdl_opts)
 
 # Global  queue
@@ -47,29 +59,64 @@ class YTSource(discord.PCMVolumeTransformer):
         self.url = data.get("url")
 
     @classmethod
-    async def from_url(cls, url, *, loop=None):
+    async def from_url(cls, url, *, loop=None, ctx):
         loop = loop or asyncio.get_event_loop()
+
+        # Extract the search results
         data = await loop.run_in_executor(
             None,
-            lambda: ytdl.extract_info(url, download=True),
+            lambda: fetch.extract_info(
+                url,
+                download=False,
+            ),
         )
-        if "entries" in data:
-            data = data["entries"][0]
-        filename = data["url"]
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
-    @classmethod
-    async def from_search(cls, query, *, loop=None):
-        loop = loop or asyncio.get_event_loop()
-        search_query = f"ytsearch:{query}"
-        data = await loop.run_in_executor(
-            None, lambda: ytdl.extract_info(search_query, download=True)
-        )
         if "entries" in data and len(data["entries"]) > 0:
             data = data["entries"][0]
         else:
+            await ctx.send("❌   No results found for the search query.")
             raise Exception("No results found for the search query.")
-        filename = data["url"]  # Using stream URL
+
+        # Check if the .mp3 file already exists
+        filename = f"./music/{data['title']}.mp3"
+        if os.path.exists(filename):
+            print(f"File {filename} already exists. Skipping download.")
+            return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+        # If file doesn't exist, download and extract the audio
+        await loop.run_in_executor(None, lambda: ytdl.download([url]))
+
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+    @classmethod
+    async def from_search(cls, query, *, loop=None, ctx):
+        loop = loop or asyncio.get_event_loop()
+        search_query = f"ytsearch:{query}"
+
+        # Extract the search results
+        data = await loop.run_in_executor(
+            None,
+            lambda: fetch.extract_info(
+                search_query,
+                download=False,
+            ),
+        )
+
+        if "entries" in data and len(data["entries"]) > 0:
+            data = data["entries"][0]
+        else:
+            await ctx.send("❌   No results found for the search query.")
+            raise Exception("No results found for the search query.")
+
+        # Check if the .mp3 file already exists
+        filename = f"./music/{data['title']}.mp3"
+        if os.path.exists(filename):
+            print(f"File {filename} already exists. Skipping download.")
+            return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+        # If file doesn't exist, download and extract the audio
+        await loop.run_in_executor(None, lambda: ytdl.download([data["url"]]))
+
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
@@ -83,44 +130,50 @@ def is_url(query):
 
 @bot.command(name="play")
 async def play(ctx, *, query):
+    async with ctx.typing():
+        # Connect to the voice channel if not connected.
+        if not ctx.voice_client:
+            if not ctx.author.voice:
+                await ctx.send(
+                    "❌   You must be in a voice channel to use this command!"
+                )
+                return
+            channel = ctx.author.voice.channel
+            await channel.connect()
 
-    # Connect to the voice channel if not connected.
-    if not ctx.voice_client:
-        if not ctx.author.voice:
-            await ctx.send("❌   You must be in a voice channel to use this command!")
-            return
-        channel = ctx.author.voice.channel
-        await channel.connect()
-
-    # Check if query is a URL or a search query.
-    if is_url(query):
-        # Youtube Link
-        print("Youtube Link")
-        player = await YTSource.from_url(query, loop=bot.loop)
-    else:
-        # Youtube Search
-        print("Youtube Search")
-        player = await YTSource.from_search(query, loop=bot.loop)
-
-    if player:
-        # Play the song if nothing is playing and the queue is empty
-        if not ctx.voice_client.is_playing() and music_queue.empty():
-            ctx.voice_client.play(
-                player,
-                after=lambda e: asyncio.run_coroutine_threadsafe(
-                    on_song_end(ctx), bot.loop
-                ),
-            )
-            await ctx.send(f"### Now playing: \n```{player.title}```")
+        # Check if query is a URL or a search query.
+        if is_url(query):
+            # Youtube Link
+            print("Youtube Link")
+            player = await YTSource.from_url(query, loop=bot.loop, ctx=ctx)
         else:
-            await music_queue.put(player)
-            await ctx.send(f"### Added to queue: \n```{player.title}```")
-    else:
-        await ctx.send("❌  Could not fetch the video.")
+            # Youtube Search
+            print("Youtube Search")
+            player = await YTSource.from_search(query, loop=bot.loop, ctx=ctx)
+
+        if player:
+            # Play the song if nothing is playing and the queue is empty
+            if not ctx.voice_client.is_playing() and music_queue.empty():
+                ctx.voice_client.play(
+                    player,
+                    after=lambda e: asyncio.run_coroutine_threadsafe(
+                        on_song_end(ctx), bot.loop
+                    ),
+                )
+                await ctx.send(
+                    f"### Now playing: \n```Title: \"{player.title}\"\nChannel: {player.data['channel']}```"
+                )
+            else:
+                await music_queue.put(player)
+                await ctx.send(
+                    f"### Added to queue: \n```Title: \"{player.title}\"\nChannel: {player.data['channel']}```"
+                )
+        else:
+            await ctx.send("❌  Could not fetch the video.")
 
 
 async def play_next(ctx):
-    if ctx.voice_client.is_playing():  # Check if already playing
+    if ctx.voice_client and ctx.voice_client.is_playing():
         return  # Don't try to play next if a song is already playing
 
     if not music_queue.empty():
@@ -131,11 +184,17 @@ async def play_next(ctx):
                 on_song_end(ctx), bot.loop
             ),
         )
-        await ctx.send(f"### Now playing: \n```{player.title}```")
+        await ctx.send(
+            f"### Now playing: \n```Title: \"{player.title}\"\nChannel: {player.data['channel']}```"
+        )
+
     else:
         # If no songs are left in the queue, disconnect
-        await ctx.send("✅  No more songs in the queue. Disconnecting...")
-        await ctx.voice_client.disconnect()
+        if ctx.voice_client:  # Ensure voice_client is not None
+            await ctx.send("✅  No more songs in the queue. Disconnecting...")
+            await ctx.voice_client.disconnect()
+        else:
+            await ctx.send("❌  Not connected to a voice channel.")
 
 
 async def on_song_end(ctx):
