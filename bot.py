@@ -43,11 +43,12 @@ fetch_opts = {
 ffmpeg_options = {"options": "-vn"}
 
 # YoutubeDL instances
-fetch = youtube_dl.YoutubeDL(fetch_opts)
+ytfetch = youtube_dl.YoutubeDL(fetch_opts)
 ytdl = youtube_dl.YoutubeDL(ytdl_opts)
 
 # Global  queue
 music_queue = asyncio.Queue()
+command_lock = asyncio.Lock()
 
 
 # Classes
@@ -62,29 +63,49 @@ class YTSource(discord.PCMVolumeTransformer):
     async def from_url(cls, url, *, loop=None, ctx):
         loop = loop or asyncio.get_event_loop()
 
-        # Extract the search results
-        data = await loop.run_in_executor(
-            None,
-            lambda: fetch.extract_info(
-                url,
-                download=False,
-            ),
-        )
+        try:
+            # Extract information from the URL
+            data = await loop.run_in_executor(
+                None, lambda: ytfetch.extract_info(url, download=False)
+            )
+        except Exception as e:
+            await ctx.send(f"❌   Failed to fetch video data. Error: {str(e)}")
+            raise Exception("Error while fetching video data.") from e
 
-        if "entries" in data and len(data["entries"]) > 0:
-            data = data["entries"][0]
-        else:
-            await ctx.send("❌   No results found for the search query.")
-            raise Exception("No results found for the search query.")
+        # If it's a playlist or search result, take the first entry
+        if "entries" in data:
+            if len(data["entries"]) > 0:
+                data = data["entries"][0]
+            else:
+                await ctx.send("❌   No entries found in the provided URL.")
+                raise Exception("No entries found in the provided URL.")
 
-        # Check if the .mp3 file already exists
-        filename = f"./music/{data['title']}.mp3"
+        # Ensure title and URL are available in data
+        if not data or "title" not in data or "url" not in data:
+            await ctx.send("❌   Video data is incomplete. Cannot process the URL.")
+            raise Exception("Incomplete video data.")
+
+        # Sanitize file name
+        sanitized_title = re.sub(r'[\\/*?:"<>|]', "", data["title"])
+        filename = f"./music/{sanitized_title}.mp3"
+
+        # Check if file exists
         if os.path.exists(filename):
-            print(f"File {filename} already exists. Skipping download.")
+            print(f"File {filename} already exists. Using the cached file.")
             return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
-        # If file doesn't exist, download and extract the audio
-        await loop.run_in_executor(None, lambda: ytdl.download([url]))
+        # Download and convert audio if file doesn't exist
+        try:
+            print(f"Downloading audio for {data['title']}...")
+            await loop.run_in_executor(None, lambda: ytdl.download([url]))
+        except Exception as e:
+            await ctx.send(f"❌   Failed to download the video. Error: {str(e)}")
+            raise Exception("Error while downloading the video.") from e
+
+        # Ensure the file was created
+        if not os.path.exists(filename):
+            await ctx.send("❌   Failed to locate the downloaded file.")
+            raise Exception("Downloaded file not found.")
 
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
@@ -96,7 +117,7 @@ class YTSource(discord.PCMVolumeTransformer):
         # Extract the search results
         data = await loop.run_in_executor(
             None,
-            lambda: fetch.extract_info(
+            lambda: ytfetch.extract_info(
                 search_query,
                 download=False,
             ),
@@ -131,45 +152,46 @@ def is_url(query):
 @bot.command(name="play")
 async def play(ctx, *, query):
     async with ctx.typing():
-        # Connect to the voice channel if not connected.
-        if not ctx.voice_client:
-            if not ctx.author.voice:
-                await ctx.send(
-                    "❌   You must be in a voice channel to use this command!"
-                )
-                return
-            channel = ctx.author.voice.channel
-            await channel.connect()
+        async with command_lock:
+            # Connect to the voice channel if not connected.
+            if not ctx.voice_client:
+                if not ctx.author.voice:
+                    await ctx.send(
+                        "❌   You must be in a voice channel to use this command!"
+                    )
+                    return
+                channel = ctx.author.voice.channel
+                await channel.connect()
 
-        # Check if query is a URL or a search query.
-        if is_url(query):
-            # Youtube Link
-            print("Youtube Link")
-            player = await YTSource.from_url(query, loop=bot.loop, ctx=ctx)
-        else:
-            # Youtube Search
-            print("Youtube Search")
-            player = await YTSource.from_search(query, loop=bot.loop, ctx=ctx)
-
-        if player:
-            # Play the song if nothing is playing and the queue is empty
-            if not ctx.voice_client.is_playing() and music_queue.empty():
-                ctx.voice_client.play(
-                    player,
-                    after=lambda e: asyncio.run_coroutine_threadsafe(
-                        on_song_end(ctx), bot.loop
-                    ),
-                )
-                await ctx.send(
-                    f"### Now playing: \n```Title: \"{player.title}\"\nChannel: {player.data['channel']}```"
-                )
+            # Check if query is a URL or a search query.
+            if is_url(query):
+                # Youtube Link
+                print("Youtube Link")
+                player = await YTSource.from_url(query, loop=bot.loop, ctx=ctx)
             else:
-                await music_queue.put(player)
-                await ctx.send(
-                    f"### Added to queue: \n```Title: \"{player.title}\"\nChannel: {player.data['channel']}```"
-                )
-        else:
-            await ctx.send("❌  Could not fetch the video.")
+                # Youtube Search
+                print("Youtube Search")
+                player = await YTSource.from_search(query, loop=bot.loop, ctx=ctx)
+
+            if player:
+                # Play the song if nothing is playing and the queue is empty
+                if not ctx.voice_client.is_playing() and music_queue.empty():
+                    ctx.voice_client.play(
+                        player,
+                        after=lambda e: asyncio.run_coroutine_threadsafe(
+                            on_song_end(ctx), bot.loop
+                        ),
+                    )
+                    await ctx.send(
+                        f"### Now playing: \n```Title: \"{player.title}\"\nChannel: {player.data['channel']}```"
+                    )
+                else:
+                    await music_queue.put(player)
+                    await ctx.send(
+                        f"### Added to queue: \n```Title: \"{player.title}\"\nChannel: {player.data['channel']}```"
+                    )
+            else:
+                await ctx.send("❌   Could not fetch the video.")
 
 
 async def play_next(ctx):
@@ -191,10 +213,10 @@ async def play_next(ctx):
     else:
         # If no songs are left in the queue, disconnect
         if ctx.voice_client:  # Ensure voice_client is not None
-            await ctx.send("✅  No more songs in the queue. Disconnecting...")
+            await ctx.send("✅   No more songs in the queue. Disconnecting...")
             await ctx.voice_client.disconnect()
         else:
-            await ctx.send("❌  Not connected to a voice channel.")
+            await ctx.send("❌   Not connected to a voice channel.")
 
 
 async def on_song_end(ctx):
@@ -206,18 +228,18 @@ async def on_song_end(ctx):
 async def skip(ctx):
     if ctx.voice_client and ctx.voice_client.is_playing():
         ctx.voice_client.stop()  # Stop the current song
-        await ctx.send("⏭️  Skipped the current song. Moving to the next.")
+        await ctx.send("⏭️   Skipped the current song. Moving to the next.")
 
         # Play the next song, if available
         await play_next(ctx)
     else:
-        await ctx.send("❌  No song is currently playing to skip.")
+        await ctx.send("❌   No song is currently playing to skip.")
 
 
 @bot.command(name="queue")
 async def queue(ctx):
     if music_queue.empty():
-        await ctx.send("❌  The queue is empty.")
+        await ctx.send("❌   The queue is empty.")
     else:
         queue_list = "\n".join(
             [f"{i+1}. {song.title}" for i, song in enumerate(list(music_queue._queue))]
