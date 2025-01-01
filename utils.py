@@ -1,4 +1,5 @@
 import re
+import utils
 
 
 def is_url(query):
@@ -13,3 +14,10 @@ def format_duration(duration):
     minutes = int(duration // 60)
     seconds = int(duration % 60)
     return f"{minutes}m {seconds}s"
+
+
+""" async def fetch_player(query, loop, ctx):
+    if utils.is_url(query):
+        return await YTSource.from_url(query, loop=loop, ctx=ctx)
+    else:
+        return await YTSource.from_search(query, loop=loop, ctx=ctx) """
