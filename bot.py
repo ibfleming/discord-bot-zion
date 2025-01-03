@@ -2,7 +2,7 @@ import asyncio
 import discord
 from discord.ext import commands
 from logger import logger
-from music import YTSource
+from music import MusicSource
 import utils
 import os
 from dotenv import load_dotenv
@@ -72,7 +72,7 @@ async def play(ctx, *, query=None):
                 # We are connected here, if the bot isn't playing music and queue is empty.
                 if not bot_voice.is_playing() and music_queue.empty():
                     logger.info(f"Bot isn't playing music and the queue is empty.")
-                    player = await YTSource.from_query(query, loop=bot.loop, ctx=ctx)
+                    player = await MusicSource.from_query(query, loop=bot.loop, ctx=ctx)
                     if player:
                         form_dur = utils.format_duration(player.data["duration"])
                         await ctx.send(
@@ -89,7 +89,7 @@ async def play(ctx, *, query=None):
                     logger.info(
                         "Bot is already playing music. Trying to add it to the queue."
                     )
-                    player = await YTSource.from_query(query, loop=bot.loop, ctx=ctx)
+                    player = await MusicSource.from_query(query, loop=bot.loop, ctx=ctx)
                     if player:
                         form_dur = utils.format_duration(player.data["duration"])
                         await ctx.send(
@@ -108,14 +108,6 @@ async def skip(ctx):
         await play_next(ctx)
     else:
         await ctx.send("> :x:   **No song is currently playing, no cap.**")
-
-
-"""
-        if music_queue.empty():
-            await ctx.send(
-                "> :wind_blowing_face:   **The queue is empty, so I'm peacin'.**"
-            )
-"""
 
 
 @bot.command(name="queue", aliases=["q"])
