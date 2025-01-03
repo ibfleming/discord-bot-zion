@@ -1,8 +1,9 @@
 *.mp3
-.env
-.vscode
 __pycache__
+music
+dist
 build
 .spec
-music
 .cache
+.env
+.vscode
