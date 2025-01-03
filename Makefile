@@ -5,7 +5,7 @@ SPEC_FILE=$(EXE_NAME).spec
 ENV_FILE=.env
 
 # Default target
-all: run
+all: build clean
 
 run:
 	python3 bot.py
@@ -16,7 +16,7 @@ build:
 
 # Clean up temporary files
 clean:
-	rm -rf dist build $(SPEC_FILE) __pycache__ $(OUTPUT_DIR)
+	rm -rf dist build .cache music $(SPEC_FILE) __pycache__
 
 # Phony targets
 .PHONY: all run build clean
