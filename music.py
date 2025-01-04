@@ -1,6 +1,7 @@
 import os
 import asyncio
 import discord
+from requests import delete
 import yt_dlp as youtube_dl
 from discord import FFmpegPCMAudio
 from logger import logger
@@ -10,21 +11,7 @@ import utils
 # Music Queue
 music_queue = asyncio.Queue()
 
-# Youtube Downloader options
-ytdl_opts = {
-    "format": "bestaudio/best",
-    "postprocessors": [
-        {
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
-        },
-    ],
-    "quiet": True,
-    "force_ipv4": True,
-    "outtmpl": "./music/%(title)s.%(ext)s",
-}
-
+# Youtube Fetch options
 fetch_opts = {
     "format": "bestaudio/best",
     "extract_flat": True,
@@ -38,7 +25,6 @@ ffmpeg_options = {"options": "-vn"}
 
 # YoutubeDL instances
 ytfetch = youtube_dl.YoutubeDL(fetch_opts)
-ytdl = youtube_dl.YoutubeDL(ytdl_opts)
 
 
 class MusicSource(discord.PCMVolumeTransformer):
@@ -87,7 +73,10 @@ class MusicSource(discord.PCMVolumeTransformer):
             await ctx.send("❌   Video data is incomplete. Cannot process the query.")
             raise Exception("Incomplete video data.")
 
-        filename = f"./music/{data['title']}.mp3"
+        # Sanitize only the filename
+        sanitized_name = utils.sanitize_filename(data["title"])  # Sanitize title only
+        filename = os.path.join("./music", f"{sanitized_name}.mp3")
+
         if os.path.exists(filename):
             logger.info("File is already downloaded. Playing the file.")
             return cls(FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
@@ -97,6 +86,22 @@ class MusicSource(discord.PCMVolumeTransformer):
             "File has not been downloaded before. Trying to download and play the file."
         )
         try:
+            # Prepare yt-dlp options for output filename
+            output_template = os.path.join("./music", f"{sanitized_name}.%(ext)s")
+            ytdl_opts = {
+                "format": "bestaudio/best",
+                "postprocessors": [
+                    {
+                        "key": "FFmpegExtractAudio",
+                        "preferredcodec": "mp3",
+                        "preferredquality": "192",
+                    },
+                ],
+                "quiet": True,
+                "force_ipv4": True,
+                "outtmpl": output_template,
+            }
+            ytdl = youtube_dl.YoutubeDL(ytdl_opts)
             # If the query is a URL, download it directly. Otherwise, download the first result from the search.
             url_to_download = query if utils.is_yt_url(query) else data["url"]
             await loop.run_in_executor(None, lambda: ytdl.download([url_to_download]))

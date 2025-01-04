@@ -19,3 +19,22 @@ def format_duration(duration):
     minutes = int(duration // 60)
     seconds = int(duration % 60)
     return f"{minutes}m {seconds}s"
+
+
+""" def sanitize_filename(filename):
+    # Remove or replace problematic characters
+    filename = re.sub(
+        r"[^\w\s.-]", "", filename
+    )  # Remove non-alphanumeric, non-space, non-dot, non-dash characters
+    filename = re.sub(
+        r"\s+", " ", filename
+    ).strip()  # Replace multiple spaces with a single space
+    return filename """
+
+
+def sanitize_filename(filename):
+    # Remove or replace problematic characters
+    filename = re.sub(
+        r"[^\w.-]", "", filename
+    )  # Remove non-alphanumeric, non-dot, non-dash characters
+    return filename
