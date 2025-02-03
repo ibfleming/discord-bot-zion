@@ -1,0 +1,7 @@
+discord.py
+ffmpeg
+colorlog
+requests
+yt_dlp
+spotipy
+python-dotenv
