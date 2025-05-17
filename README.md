@@ -40,4 +40,4 @@ Need help or want to suggest features? Feel free to open an issue or contact the
 
 ---
 
-*Let the music flow with ZION! 🎵*
+*Let the music flow! 🎵*
