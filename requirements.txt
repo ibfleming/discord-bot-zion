@@ -1,0 +1,6 @@
+discord.py[voice] ~= 2.5
+pynacl ~= 1.5
+python-dotenv ~= 1.1
+yt-dlp[default] ~= 2025.4.30
+opuslib ~= 3.0
+loguru ~= 0.7
