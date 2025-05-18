@@ -7,6 +7,7 @@ import asyncio
 import signal
 import sys
 
+from cogs.help import Help
 from config import DISCORD_TOKEN
 from logger import logger
 from core.shutdown import shutdown
@@ -22,6 +23,7 @@ def create_bot():
         command_prefix=".",
         description="Magi of Zion, the bot for Zion, dedicated for music and righteousness.",
         intents=intents,
+        help_command=None,
     )
 
     return bot
@@ -42,6 +44,7 @@ async def main():
         logger.info(f"Logged in as {bot.user} (ID: {bot.user.id})")
 
     async with bot:
+        await bot.add_cog(Help(bot))
         await bot.add_cog(Music(bot))
         try:
             await bot.start(DISCORD_TOKEN)

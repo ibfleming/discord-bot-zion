@@ -1,9 +1,11 @@
 # cogs/music.py
 
 import re
+import discord
 from discord.ext import commands
 from core.ytdl import YTDLSource
 from loguru import logger
+from collections import deque
 
 
 def is_youtube_url(string):
@@ -14,29 +16,116 @@ def is_youtube_url(string):
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.queues = {}
+
+    def get_queue(self, guild_id):
+        if guild_id not in self.queues:
+            self.queues[guild_id] = deque()
+        return self.queues[guild_id]
+
+    async def play_next(self, ctx):
+        queue = self.get_queue(ctx.guild.id)
+        if not queue:
+            logger.info("Queue is empty.")
+            return
+
+        next_query = queue.popleft()
+        try:
+            player = (
+                await YTDLSource.from_url(next_query, loop=self.bot.loop, stream=True)
+                if is_youtube_url(next_query)
+                else await YTDLSource.from_string(
+                    next_query, loop=self.bot.loop, stream=True
+                )
+            )
+            ctx.voice_client.play(
+                player,
+                after=lambda e: (
+                    self.bot.loop.create_task(self.play_next(ctx))
+                    if not e
+                    else logger.error(f"Player error: {e}")
+                ),
+            )
+            await ctx.send(f"🎶 Now playing: {player.title}")
+            logger.info(f"Now playing: {player.title}")
+        except Exception as e:
+            logger.exception(f"Queue playback error: {e}")
+            await ctx.send("❌ Failed to play the next song.")
+
+    @commands.group(name="queue", invoke_without_command=True)
+    async def queue_group(self, ctx):
+        await ctx.send("Subcommands: list, add <song>, clear")
+
+    @queue_group.command(name="list")
+    async def queue_list(self, ctx):
+        queue = self.get_queue(ctx.guild.id)
+        if not queue:
+            return await ctx.send("📭 Queue is empty.")
+
+        description = "\n".join(f"`{i+1}.` {song}" for i, song in enumerate(queue))
+        embed = discord.Embed(
+            title="🎶 Current Queue", description=description, color=0x1DB954
+        )
+        await ctx.send(embed=embed)
+
+    @queue_group.command(name="add")
+    async def queue_add(self, ctx, *, song: str = None):
+        if not song or not song.strip():
+            return await ctx.send("❌ Please provide a valid song name or URL.")
+
+        queue = self.get_queue(ctx.guild.id)
+        queue.append(song)
+        await ctx.send(f"✅ Added to queue: `{song}`")
+        logger.info(f"Added to queue: {song}")
+
+    @queue_group.command(name="clear")
+    async def queue_clear(self, ctx):
+        queue = self.get_queue(ctx.guild.id)
+        queue.clear()
+        await ctx.send("Queue cleared.")
+        logger.info("Queue cleared.")
+
+    @commands.command()
+    async def skip(self, ctx):
+        if ctx.voice_client and ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
+            await ctx.send("⏭️ Skipped current track.")
+            logger.info("Track skipped.")
+        else:
+            await ctx.send("Nothing is currently playing.")
+
+    @commands.command()
+    async def resume(self, ctx):
+        if ctx.voice_client and ctx.voice_client.is_paused():
+            ctx.voice_client.resume()
+            await ctx.send("▶️ Resumed playback.")
+            logger.info("Playback resumed.")
+        else:
+            await ctx.send("Playback is not paused.")
+
+    @commands.command()
+    async def pause(self, ctx):
+        if ctx.voice_client and ctx.voice_client.is_playing():
+            ctx.voice_client.pause()
+            await ctx.send("⏸️ Paused playback.")
+            logger.info("Playback paused.")
+        else:
+            await ctx.send("Nothing is currently playing.")
 
     @commands.command()
     async def play(self, ctx, *, query):
         async with ctx.typing():
-            try:
-                if is_youtube_url(query):
-                    player = await YTDLSource.from_url(
-                        query, loop=self.bot.loop, stream=True
-                    )
-                else:
-                    player = await YTDLSource.from_string(
-                        query, loop=self.bot.loop, stream=True
-                    )
+            queue = self.get_queue(ctx.guild.id)
+            should_play_immediately = not ctx.voice_client.is_playing() and not queue
 
-                ctx.voice_client.play(
-                    player,
-                    after=lambda e: logger.error(f"Player error: {e}") if e else None,
-                )
-                await ctx.send(f"Now playing: {player.title}")
-                logger.info(f"Now playing: {player.title}")
-            except Exception as e:
-                await ctx.send("An error occurred while trying to play the song.")
-                logger.error(f"Error in play command: {e}")
+            queue.append(query)
+            logger.info(f"Queued: {query}")
+
+            if not should_play_immediately:
+                await ctx.send(f"✅ Added to queue: `{query}`")
+
+            if should_play_immediately:
+                await self.play_next(ctx)
 
     @commands.command()
     async def volume(self, ctx, volume: int):
@@ -66,6 +155,3 @@ class Music(commands.Cog):
             else:
                 await ctx.send("You are not connected to a voice channel.")
                 raise commands.CommandError("Author not connected to a voice channel.")
-        elif ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-            logger.info("Stopped the current playing audio.")

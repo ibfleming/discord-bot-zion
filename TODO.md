@@ -1,0 +1,1 @@
+- Kick bot out of voice channel after inactivity
