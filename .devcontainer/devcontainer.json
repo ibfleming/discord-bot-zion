@@ -1,17 +1,20 @@
 {
-  "name": "Python Dev Container",
+  "name": "Discord Bot Dev Container",
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter"
+      ],
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      }
+    }
   },
-  "postCreateCommand": "pip install --no-cache-dir -r requirements.txt",
-  "extensions": [
-    "ms-python.python",
-    "ms-python.vscode-pylance",
-    "ms-python.black-formatter"
-  ],
-  "forwardPorts": [],
+  "postCreateCommand": "pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt",
   "remoteUser": "root"
 }
