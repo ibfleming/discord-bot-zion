@@ -25,11 +25,13 @@ class Music(commands.Cog):
 
     async def play_next(self, ctx):
         queue = self.get_queue(ctx.guild.id)
+        logger.debug(f"Queue state before playing next: {list(queue)}")
         if not queue:
             logger.info("Queue is empty.")
             return
 
         next_query = queue.popleft()
+        logger.debug(f"Next query to play: {next_query}")
         try:
             player = (
                 await YTDLSource.from_url(next_query, loop=self.bot.loop, stream=True)
@@ -120,6 +122,7 @@ class Music(commands.Cog):
 
             queue.append(query)
             logger.info(f"Queued: {query}")
+            logger.debug(f"Queue state after adding: {list(queue)}")
 
             if not should_play_immediately:
                 await ctx.send(f"✅ Added to queue: `{query}`")
@@ -146,12 +149,23 @@ class Music(commands.Cog):
 
     @play.before_invoke
     async def ensure_voice(self, ctx):
+        logger.debug("Entering ensure_voice method.")
         if ctx.voice_client is None:
             if ctx.author.voice:
-                await ctx.author.voice.channel.connect()
-                logger.info(
-                    f"Connected to voice channel: {ctx.author.voice.channel.name}"
-                )
+                try:
+                    logger.debug(
+                        f"Attempting to connect to voice channel: {ctx.author.voice.channel.name}"
+                    )
+                    await ctx.author.voice.channel.connect()
+                    logger.info(
+                        f"Connected to voice channel: {ctx.author.voice.channel.name}"
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to connect to voice channel: {e}")
+                    await ctx.send("❌ Failed to connect to the voice channel.")
+                    raise commands.CommandError("Voice connection failed.")
             else:
                 await ctx.send("You are not connected to a voice channel.")
                 raise commands.CommandError("Author not connected to a voice channel.")
+        else:
+            logger.debug("Bot is already connected to a voice channel.")

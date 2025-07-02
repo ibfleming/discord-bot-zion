@@ -1,0 +1,6 @@
+services:
+  zion-bot:
+    image: docker.io/ibfleming/zion-discord-bot:latest
+    restart: unless-stopped
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}

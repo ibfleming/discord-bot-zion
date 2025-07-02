@@ -23,8 +23,9 @@ YTDL_FORMAT_OPTIONS = {
     "no_warnings": True,
     "default_search": "auto",
     "source_address": "0.0.0.0",
+    "live_chunk_size": 10,
 }
 
 FFMPEG_OPTIONS = {
-    "options": "-vn",
+    "options": "-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -buffer_size 1024000 -probesize 1000000 -rw_timeout 5000000",
 }
