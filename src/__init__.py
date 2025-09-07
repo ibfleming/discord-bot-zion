@@ -6,7 +6,7 @@ Zion Discord Bot - A music bot for Discord servers.
 """
 
 __version__ = "1.0.0"
-__author__ = "Your Name"
+__author__ = "Ian Fleming"
 __description__ = (
-    "Magi of Zion, the bot for Zion, dedicated for music and righteousness."
+    "Discord music bot for Zion Discord Server. Specializes in playing music."
 )

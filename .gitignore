@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
-.ruff_cache
+.mypy_cache/
+.ruff_cache/
 __pycache__/
 *.py[cod]
 *$py.class

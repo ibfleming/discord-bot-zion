@@ -28,19 +28,18 @@ echo "Step 2: Tagging Docker image..."
 docker tag $APP $USERNAME/$APP:$VERSION
 docker tag $APP $USERNAME/$APP:latest
 
-# Login to Docker Hub (will prompt for credentials if not already logged in)
-echo "Step 3: Logging into Docker Hub..."
-docker login
+# We would login in here but our dev container is using local 
+# Docker config which should have a personal access token and 
+# therefore we are already authenticated
 
 # Push the versioned image
 echo "Step 4: Pushing versioned image ($VERSION)..."
 docker push $USERNAME/$APP:$VERSION
 
 # Push the latest image
-echo "Step 5: Pushing latest image..."
-docker push $USERNAME/$APP:latest
+# echo "Step 5: Pushing latest image..."
+# docker push $USERNAME/$APP:latest
 
-echo "✅ Successfully built and pushed $APP:$VERSION and $APP:latest"
+echo "✅ Successfully built and pushed $APP:$VERSION"
 echo "Images pushed to:"
 echo "  - $USERNAME/$APP:$VERSION"
-echo "  - $USERNAME/$APP:latest"
