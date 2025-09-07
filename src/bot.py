@@ -22,7 +22,7 @@ def create_bot():
 
     bot = commands.Bot(
         command_prefix=".",
-        description="Magi of Zion, the bot for Zion, dedicated for music and righteousness.",
+        description="Father Funk, dedicated for music and righteousness.",
         intents=intents,
         help_command=None,
     )

@@ -3,13 +3,12 @@
 import asyncio
 
 import discord
-import yt_dlp as youtube_dl  # type: ignore
+import yt_dlp as youtube_dl
 
 from config import FFMPEG_OPTIONS, YTDL_FORMAT_OPTIONS
 
-youtube_dl.utils.bug_reports_message = lambda: ""
-
 ytdl = youtube_dl.YoutubeDL(YTDL_FORMAT_OPTIONS)
+# youtube_dl.utils.bug_reports_message = lambda: ""
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
