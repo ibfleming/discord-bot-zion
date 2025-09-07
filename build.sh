@@ -36,10 +36,6 @@ docker tag $APP $USERNAME/$APP:latest
 echo "Step 4: Pushing versioned image ($VERSION)..."
 docker push $USERNAME/$APP:$VERSION
 
-# Push the latest image
-# echo "Step 5: Pushing latest image..."
-# docker push $USERNAME/$APP:latest
-
 echo "✅ Successfully built and pushed $APP:$VERSION"
 echo "Images pushed to:"
 echo "  - $USERNAME/$APP:$VERSION"
