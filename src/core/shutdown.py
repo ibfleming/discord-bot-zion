@@ -1,6 +1,6 @@
-# core/shutdown.py
+"""Graceful shutdown procedures for the program."""
 
-from ..logger import logger
+from logger import logger
 
 
 async def shutdown(bot, sig):

@@ -1,11 +1,11 @@
-# core/ytdl.py
+"""YouTube download and streaming utilities for the Zion Discord Bot."""
 
 import asyncio
 
 import discord
 import yt_dlp as youtube_dl  # type: ignore
 
-from ..config import FFMPEG_OPTIONS, YTDL_FORMAT_OPTIONS
+from config import FFMPEG_OPTIONS, YTDL_FORMAT_OPTIONS
 
 youtube_dl.utils.bug_reports_message = lambda: ""
 

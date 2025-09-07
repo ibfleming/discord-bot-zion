@@ -1,4 +1,4 @@
 [project]
 name = "zion_discord_bot"
-version = "1.0.0"
+version = "1.0.0.dev"
 description = "A Discord bot for Zion server"

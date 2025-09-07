@@ -1,3 +1,5 @@
+"""Help command cog for the Zion Discord Bot."""
+
 import discord
 from discord.ext import commands
 

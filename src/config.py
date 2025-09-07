@@ -1,11 +1,12 @@
-# config.py
+"""Configuration settings for the Zion Discord Bot."""
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DISCORD_TOKEN = DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
 if not DISCORD_TOKEN:
     print("DISCORD_TOKEN is not set or is empty. Please check your .env file.")

@@ -1,0 +1,26 @@
+[lint]
+select = [
+    "E",   # pycodestyle (PEP 8)
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "D",   # pydocstyle (docstrings, optional)\
+]
+ignore = [
+    "E501", # Ignore line length if using Black
+    "D203", # 1 blank line required before class docstring (conflicts with D211)
+    "D212", # Multi-line docstring summary should start at the second line (conflicts with D213)
+    "D103", # Missing docstring in public function (handled by mypy)
+    "D101", # Missing docstring in public class (handled by mypy)
+    "D102", # Missing docstring in public method (handled by mypy)
+    "D107", # Missing docstring in __init__ (handled by mypy)
+]
+
+[format]
+indent-style = "space"
+line-ending = "lf"
+quote-style = "double"

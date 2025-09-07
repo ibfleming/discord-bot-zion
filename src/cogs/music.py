@@ -1,4 +1,4 @@
-# cogs/music.py
+"""Music command cog for the Zion Discord Bot."""
 
 import re
 from collections import deque
@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands
 from loguru import logger
 
-from ..core.ytdl import YTDLSource
+from core.ytdl import YTDLSource
 
 
 def is_youtube_url(string):
@@ -180,7 +180,7 @@ class Music(commands.Cog):
                 except Exception as e:
                     logger.error(f"Failed to connect to voice channel: {e}")
                     await ctx.send("❌ Failed to connect to the voice channel.")
-                    raise commands.CommandError("Voice connection failed.")
+                    raise commands.CommandError("Voice connection failed.") from e
             else:
                 await ctx.send("You are not connected to a voice channel.")
                 raise commands.CommandError("Author not connected to a voice channel.")

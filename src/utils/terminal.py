@@ -1,4 +1,4 @@
-# utils/terminal.py
+"""Terminal configuration utilities for the Zion Discord Bot."""
 
 import os
 import subprocess

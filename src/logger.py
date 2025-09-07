@@ -1,6 +1,7 @@
-# logger.py
+"""Logging configuration for the Zion Discord Bot."""
 
 import sys
+
 from loguru import logger
 
 logger.remove()

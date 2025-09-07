@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+"""Main entry point for the Zion Discord Bot."""
 
 import asyncio
 import signal
+import sys
 
 import discord
 from discord.ext import commands
 
-from .cogs.help import Help
-from .cogs.music import Music
-from .config import DISCORD_TOKEN
-from .core.shutdown import shutdown
-from .logger import logger
-from .utils.terminal import configure_terminal
+from cogs.help import Help
+from cogs.music import Music
+from config import DISCORD_TOKEN
+from core.shutdown import shutdown
+from logger import logger
+from utils.terminal import configure_terminal
 
 
 def create_bot():
@@ -54,3 +55,13 @@ async def main():
             if not bot.is_closed():
                 await bot.close()
             logger.info("Bot has been shut down gracefully")
+
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Bot has been shut down via keyboard interrupt")
+    except Exception as e:
+        logger.error(f"Unexpected error during shutdown: {e}")
+        sys.exit(1)
