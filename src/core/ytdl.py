@@ -3,9 +3,9 @@
 import asyncio
 
 import discord
-import yt_dlp as youtube_dl
+import yt_dlp as youtube_dl  # type: ignore
 
-from config import FFMPEG_OPTIONS, YTDL_FORMAT_OPTIONS
+from ..config import FFMPEG_OPTIONS, YTDL_FORMAT_OPTIONS
 
 youtube_dl.utils.bug_reports_message = lambda: ""
 

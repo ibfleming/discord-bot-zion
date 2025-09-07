@@ -1,6 +1,6 @@
 # core/shutdown.py
 
-from logger import logger
+from ..logger import logger
 
 
 async def shutdown(bot, sig):

@@ -9,8 +9,8 @@ Usage: python -m src.bot
 import asyncio
 import sys
 
-from bot import main
-from logger import logger
+from .bot import main
+from .logger import logger
 
 if __name__ == "__main__":
     try:

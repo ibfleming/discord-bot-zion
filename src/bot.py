@@ -7,12 +7,12 @@ import signal
 import discord
 from discord.ext import commands
 
-from cogs.help import Help
-from cogs.music import Music
-from config import DISCORD_TOKEN
-from core.shutdown import shutdown
-from logger import logger
-from utils.terminal import configure_terminal
+from .cogs.help import Help
+from .cogs.music import Music
+from .config import DISCORD_TOKEN
+from .core.shutdown import shutdown
+from .logger import logger
+from .utils.terminal import configure_terminal
 
 
 def create_bot():

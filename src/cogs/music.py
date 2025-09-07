@@ -2,12 +2,13 @@
 
 import re
 from collections import deque
+from typing import Optional
 
 import discord
 from discord.ext import commands
 from loguru import logger
 
-from core.ytdl import YTDLSource
+from ..core.ytdl import YTDLSource
 
 
 def is_youtube_url(string):
@@ -56,15 +57,20 @@ class Music(commands.Cog):
             logger.exception(f"Queue playback error: {e}")
             await ctx.send("❌ Failed to play the next song.")
 
-    @commands.group(name="queue", invoke_without_command=True)
-    async def queue_group(self, ctx):
+    @commands.group(name="queue", invoke_without_command=True)  # type: ignore[arg-type]
+    async def queue_group(self, ctx: commands.Context):
         await ctx.send("Subcommands: list, add <song>, clear")
 
-    @queue_group.command(name="list")
-    async def queue_list(self, ctx):
+    @queue_group.command(name="list")  # type: ignore[arg-type]
+    async def queue_list(self, ctx: commands.Context):
+        if not ctx.guild:
+            await ctx.send("❌ This command can only be used in a server.")
+            return
+
         queue = self.get_queue(ctx.guild.id)
         if not queue:
-            return await ctx.send("📭 Queue is empty.")
+            await ctx.send("📭 Queue is empty.")
+            return
 
         description = "\n".join(f"`{i + 1}.` {song}" for i, song in enumerate(queue))
         embed = discord.Embed(
@@ -72,18 +78,27 @@ class Music(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @queue_group.command(name="add")
-    async def queue_add(self, ctx, *, song: str = None):
+    @queue_group.command(name="add")  # type: ignore[arg-type]
+    async def queue_add(self, ctx: commands.Context, *, song: Optional[str] = None):
         if not song or not song.strip():
-            return await ctx.send("❌ Please provide a valid song name or URL.")
+            await ctx.send("❌ Please provide a valid song name or URL.")
+            return
+
+        if not ctx.guild:
+            await ctx.send("❌ This command can only be used in a server.")
+            return
 
         queue = self.get_queue(ctx.guild.id)
         queue.append(song)
         await ctx.send(f"✅ Added to queue: `{song}`")
         logger.info(f"Added to queue: {song}")
 
-    @queue_group.command(name="clear")
-    async def queue_clear(self, ctx):
+    @queue_group.command(name="clear")  # type: ignore[arg-type]
+    async def queue_clear(self, ctx: commands.Context):
+        if not ctx.guild:
+            await ctx.send("❌ This command can only be used in a server.")
+            return
+
         queue = self.get_queue(ctx.guild.id)
         queue.clear()
         await ctx.send("Queue cleared.")
