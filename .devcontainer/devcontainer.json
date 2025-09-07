@@ -6,8 +6,12 @@
     "--network=host"
   ],
   "mounts": [
-    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.docker,target=/home/vscode/.docker,type=bind,consistency=cached"
   ],
+  "remoteEnv": {
+    "DOCKER_CONFIG": "/home/vscode/.docker"
+  },
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": "true"
