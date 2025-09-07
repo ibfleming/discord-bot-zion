@@ -64,7 +64,7 @@ class Music(commands.Cog):
         if not queue:
             return await ctx.send("📭 Queue is empty.")
 
-        description = "\n".join(f"`{i+1}.` {song}" for i, song in enumerate(queue))
+        description = "\n".join(f"`{i + 1}.` {song}" for i, song in enumerate(queue))
         embed = discord.Embed(
             title="🎶 Current Queue", description=description, color=0x1DB954
         )

@@ -1,20 +1,48 @@
 {
   "name": "Discord Bot Dev Container",
-  "build": {
-    "dockerfile": "Dockerfile"
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "remoteUser": "vscode",
+  "runArgs": [
+    "--network=host"
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": "true"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.13",
+      "installTools": "true",
+      "toolsToInstall": "ruff,mypy"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": "false"
+    }
   },
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "ms-python.black-formatter"
+        "mikestead.dotenv",
+        "charliermarsh.ruff",
+        "foxundermoon.shell-format"
       ],
       "settings": {
-        "terminal.integrated.shell.linux": "/bin/bash"
+        "github.copilot.chat.commitMessageGeneration.instructions": [
+          {
+            "file": ".github/commit-instructions.md"
+          }
+        ],
+        "[python]": {
+          "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+          },
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        },
+        "[shellscript]": {
+          "editor.defaultFormatter": "foxundermoon.shell-format"
+        }
       }
     }
   },
-  "postCreateCommand": "pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt",
-  "remoteUser": "root"
+  "postCreateCommand": "./.devcontainer/post-create.sh"
 }
