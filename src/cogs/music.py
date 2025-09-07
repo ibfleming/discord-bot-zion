@@ -1,11 +1,13 @@
 # cogs/music.py
 
 import re
+from collections import deque
+
 import discord
 from discord.ext import commands
-from core.ytdl import YTDLSource
 from loguru import logger
-from collections import deque
+
+from core.ytdl import YTDLSource
 
 
 def is_youtube_url(string):

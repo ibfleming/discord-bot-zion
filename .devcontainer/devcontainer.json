@@ -26,7 +26,8 @@
       "extensions": [
         "mikestead.dotenv",
         "charliermarsh.ruff",
-        "foxundermoon.shell-format"
+        "foxundermoon.shell-format",
+        "tamasfe.even-better-toml"
       ],
       "settings": {
         "github.copilot.chat.commitMessageGeneration.instructions": [

@@ -1,9 +1,11 @@
 # core/ytdl.py
 
 import asyncio
+
 import discord
 import yt_dlp as youtube_dl
-from config import YTDL_FORMAT_OPTIONS, FFMPEG_OPTIONS
+
+from config import FFMPEG_OPTIONS, YTDL_FORMAT_OPTIONS
 
 youtube_dl.utils.bug_reports_message = lambda: ""
 
