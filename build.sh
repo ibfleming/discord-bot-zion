@@ -3,7 +3,7 @@
 # Docker build and push script for Zion Discord Bot
 # Usage: ./build.sh <version>
 
-set -e  # Exit on any error
+set -e # Exit on any error
 
 # Check if version argument is provided
 if [ $# -eq 0 ]; then
@@ -28,8 +28,8 @@ echo "Step 2: Tagging Docker image..."
 docker tag $APP $USERNAME/$APP:$VERSION
 docker tag $APP $USERNAME/$APP:latest
 
-# We would login in here but our dev container is using local 
-# Docker config which should have a personal access token and 
+# We would login in here but our dev container is using local
+# Docker config which should have a personal access token and
 # therefore we are already authenticated
 
 # Push the versioned image

@@ -1,12 +1,12 @@
 pipeline {
     agent any
-    
+
     environment {
         // Environment variables will go here
         DOCKER_IMAGE = 'zion-discord-bot'
         PYTHON_VERSION = '3.13'
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
@@ -14,49 +14,49 @@ pipeline {
                 echo 'Checking out source code...'
             }
         }
-        
+
         stage('Setup') {
             steps {
                 // Setup Python environment and dependencies
                 echo 'Setting up Python environment...'
             }
         }
-        
+
         stage('Lint') {
             steps {
                 // Code quality checks (flake8, black, etc.)
                 echo 'Running code linting...'
             }
         }
-        
+
         stage('Test') {
             steps {
                 // Run unit tests
                 echo 'Running tests...'
             }
         }
-        
+
         stage('Security Scan') {
             steps {
                 // Security vulnerability scanning
                 echo 'Running security scans...'
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
                 // Build Docker container
                 echo 'Building Docker image...'
             }
         }
-        
+
         stage('Integration Tests') {
             steps {
                 // Run integration tests against built image
                 echo 'Running integration tests...'
             }
         }
-        
+
         stage('Deploy to Staging') {
             when {
                 branch 'develop'
@@ -66,7 +66,7 @@ pipeline {
                 echo 'Deploying to staging...'
             }
         }
-        
+
         stage('Deploy to Production') {
             when {
                 branch 'main'
@@ -77,23 +77,23 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             // Cleanup actions that always run
             echo 'Cleaning up...'
         }
-        
+
         success {
             // Actions on successful build
             echo 'Pipeline completed successfully!'
         }
-        
+
         failure {
             // Actions on failed build
             echo 'Pipeline failed!'
         }
-        
+
         unstable {
             // Actions on unstable build
             echo 'Pipeline is unstable!'
