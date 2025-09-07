@@ -1,7 +1,5 @@
 - Kick bot out of voice channel after inactivity
 
-- Kick bot out of voice channel after inactivity
-
 docker build -t zion-discord-bot .
 docker login
 docker tag zion-discord-bot ibfleming/zion-discord-bot:latest
