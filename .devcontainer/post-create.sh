@@ -21,7 +21,7 @@ main() {
 
     local requirements_file="${repo_root}/requirements.txt"
 
-    if [[ -f "$requirements_file" ]]; then
+    if [[ -f $requirements_file ]]; then
         log_info "Installing requirements from $requirements_file..."
         python3 -m pip install -r "$requirements_file"
     else
