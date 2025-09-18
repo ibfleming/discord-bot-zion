@@ -2,7 +2,6 @@
 
 import re
 from collections import deque
-from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -83,7 +82,7 @@ class Music(commands.Cog):
         await ctx.send(embed=embed)
 
     @queue_group.command(name="add")
-    async def queue_add(self, ctx: commands.Context, *, song: Optional[str] = None):
+    async def queue_add(self, ctx: commands.Context, *, song: str | None = None):
         if not song or not song.strip():
             await ctx.send("❌ Please provide a valid song name or URL.")
             return

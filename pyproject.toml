@@ -1,7 +1,7 @@
 [project]
 name = "zion_discord_bot"
-version = "1.0.0.dev"
+dynamic = ["version"]
 description = "A Discord bot for Zion server"
-
-[tool.mypy]
-ignore_missing_imports = true
+requires-python = ">=3.13"
+readme = "README.md"
+license-files = ["LICENSE"]
