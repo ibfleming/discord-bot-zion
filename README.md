@@ -1,56 +1,160 @@
-# `ZION Discord Music Bot 🎵`
+# ZION Discord Music Bot
 
-Welcome to **Magi of Zion**, the sleek and simple Discord music bot designed to bring your favorite tunes straight to your Discord channel!
-
----
+A powerful Discord music bot built with Python 3.13 that streams high-quality audio directly from YouTube without downloading files. Features per-guild queue management, seamless playback, and graceful shutdown handling.
 
 ## Features
 
-- 🎶 **Play Music**: Stream music from YouTube, Spotify, and more.
-- ⚡ **Fast and Reliable**: Low-latency playback for a smooth listening experience.
-- 🎛 **Easy Controls**: Play, pause, skip, and stop commands at your fingertips.
-- 🔊 **Seamless Queue Management**: Add, view, and manage your song queue effortlessly.
-- 🎧 **High-Quality Audio**: Enjoy crisp and clear sound in your voice channels.
+- **YouTube Streaming**: Direct audio streaming from YouTube using yt-dlp
+- **Per-Guild Queues**: Independent music queues for each Discord server
+- **High Performance**: Built with discord.py 2.6 and asyncio for optimal performance
+- **Complete Playback Controls**: Play, pause, resume, skip, stop, and volume control
+- **Smart Queue Management**: Add, view, and clear queues with ease
+- **High-Quality Audio**: FFmpeg integration with reconnection and buffering
+- **Robust Error Handling**: Comprehensive logging and graceful error recovery
+- **Docker Ready**: Containerized deployment with multi-stage builds
 
----
+## Commands Bot 🎵
 
-## How to Use
+A powerful Discord music bot built with Python 3.13 that streams high-quality audio directly from YouTube without downloading files. Features per-guild queue management, seamless playback, and graceful shutdown handling.
 
-1. **Invite ZION** to your server.  
-2. Join a voice channel.  
-3. Use simple commands to control the music:  
+## ✨ Features
 
-| Command       | Description                                 |
-| --------------|---------------------------------------------|
-| `.play <url or title>` | Play a song or add it to the queue |
-| `.volume`              | Pause the current song             |
-| `.stop`                | Stop the music                     |
+- 🎶 **YouTube Streaming**: Direct audio streaming from YouTube using yt-dlp
+- 📱 **Per-Guild Queues**: Independent music queues for each Discord server
+- ⚡ **High Performance**: Built with discord.py 2.6 and asyncio for optimal performance
+- 🎛️ **Complete Playback Controls**: Play, pause, resume, skip, stop, and volume control
+- � **Smart Queue Management**: Add, view, and clear queues with ease
+- 🔊 **High-Quality Audio**: FFmpeg integration with reconnection and buffering
+- 🛡️ **Robust Error Handling**: Comprehensive logging and graceful error recovery
+- 🐳 **Docker Ready**: Containerized deployment with multi-stage builds
 
----
+## 🎮 Commands
 
-## Get Started
+All commands use the `.` prefix:
 
-Invite ZION to your Discord channel and start playing your favorite tracks instantly!
+### Music Playback
+| Command | Description | Example |
+|---------|-------------|---------|
+| `.play <url or search>` | Play a song or add it to the queue | `.play never gonna give you up` |
+| `.pause` | Pause the current song | `.pause` |
+| `.resume` | Resume the paused song | `.resume` |
+| `.skip` | Skip to the next song in the queue | `.skip` |
+| `.stop` | Stop playback and disconnect from voice | `.stop` |
+| `.volume <0-100>` | Set playback volume (0-100%) | `.volume 75` |
 
----
+### Queue Management
+| Command | Description | Example |
+|---------|-------------|---------|
+| `.queue list` | Show the current queue | `.queue list` |
+| `.queue add <song>` | Add a song to the queue | `.queue add bohemian rhapsody` |
+| `.queue clear` | Clear the entire queue | `.queue clear` |
 
-## Support
+### General
+| Command | Description |
+|---------|-------------|
+| `.help` | Show available commands |
 
-Need help or want to suggest features? Feel free to open an issue or contact the maintainer.
+## Quick Start
 
----
+### Prerequisites
+- Python 3.13+
+- FFmpeg installed and available in PATH
+- Discord Bot Token
 
-*Let the music flow! 🎵*
+### Installation
 
-- Kick bot out of voice channel after inactivity
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/ibfleming/zion-discord-bot.git
+   cd zion-discord-bot
+   ```
 
-docker build -t zion-discord-bot .
-docker login
-docker tag zion-discord-bot ibfleming/zion-discord-bot:latest
-docker push ibfleming/zion-discord-bot:latest
+2. **Set up environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-USERNAME=ibfleming
-APP=zion-discord-bot
-docker build -t $ .
-docker tag my-app $USERNAME/$APP:1.0.1
-docker push $USERNAME$/$APP:1.0.1
+3. **Configure environment variables:**
+   ```bash
+   # Create .env file
+   echo "DISCORD_TOKEN=your_discord_bot_token_here" > .env
+   ```
+
+4. **Run the bot:**
+   ```bash
+   python src/bot.py
+   ```
+
+## Docker Deployment
+
+### Using Docker Compose (Recommended)
+
+1. **Create environment file:**
+   ```bash
+   echo "DISCORD_TOKEN=your_discord_bot_token_here" > .env
+   ```
+
+2. **Deploy with compose:**
+   ```bash
+   docker-compose up -d
+   ```
+
+### Manual Docker Build
+
+1. **Build and run:**
+   ```bash
+   ./build.sh 1.0.1
+   docker run -d --name zion-bot -e DISCORD_TOKEN=your_token ibfleming/zion-discord-bot:latest
+   ```
+
+## Development
+
+### Project Structure
+
+```plaintext
+src/
+├── bot.py          # Main entry point and bot setup
+├── config.py       # Configuration and environment variables  
+├── logger.py       # Logging configuration
+├── cogs/
+│   ├── music.py    # Music commands and queue management
+│   └── help.py     # Help command
+├── core/
+│   ├── ytdl.py     # YouTube streaming engine
+│   └── shutdown.py # Graceful shutdown handling
+└── utils/
+    └── terminal.py # Terminal configuration
+```
+
+### Running Tests
+```bash
+pytest tests/
+```
+
+### Key Technologies
+- **discord.py 2.6**: Discord API wrapper with voice support
+- **yt-dlp**: YouTube audio extraction and streaming
+- **FFmpeg**: Audio processing and streaming
+- **loguru**: Advanced logging with colors and formatting
+- **asyncio**: Asynchronous programming for high performance
+
+## Configuration
+
+The bot uses environment variables for configuration:
+
+- `DISCORD_TOKEN`: Your Discord bot token (required)
+
+FFmpeg and yt-dlp options are pre-configured for optimal streaming performance.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes and test thoroughly
+4. Submit a pull request with a clear description
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
