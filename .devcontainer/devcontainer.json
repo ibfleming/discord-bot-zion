@@ -55,6 +55,7 @@
                         "file": ".github/commit-instructions.md"
                     }
                 ],
+                "github.copilot.chat.codeGeneration.useInstructionFiles": true,
                 "[python]": {
                     "editor.codeActionsOnSave": {
                         "source.fixAll": "explicit",
