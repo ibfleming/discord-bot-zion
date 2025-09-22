@@ -118,11 +118,13 @@ src/
 ```
 
 ### Running Tests
+
 ```bash
 pytest tests/
 ```
 
 ### Key Technologies
+
 - **discord.py 2.6**: Discord API wrapper with voice support
 - **yt-dlp**: YouTube audio extraction and streaming
 - **FFmpeg**: Audio processing and streaming
