@@ -13,26 +13,12 @@ A powerful Discord music bot built with Python 3.13 that streams high-quality au
 - **Robust Error Handling**: Comprehensive logging and graceful error recovery
 - **Docker Ready**: Containerized deployment with multi-stage builds
 
-## Commands Bot 🎵
-
-A powerful Discord music bot built with Python 3.13 that streams high-quality audio directly from YouTube without downloading files. Features per-guild queue management, seamless playback, and graceful shutdown handling.
-
-## ✨ Features
-
-- 🎶 **YouTube Streaming**: Direct audio streaming from YouTube using yt-dlp
-- 📱 **Per-Guild Queues**: Independent music queues for each Discord server
-- ⚡ **High Performance**: Built with discord.py 2.6 and asyncio for optimal performance
-- 🎛️ **Complete Playback Controls**: Play, pause, resume, skip, stop, and volume control
-- � **Smart Queue Management**: Add, view, and clear queues with ease
-- 🔊 **High-Quality Audio**: FFmpeg integration with reconnection and buffering
-- 🛡️ **Robust Error Handling**: Comprehensive logging and graceful error recovery
-- 🐳 **Docker Ready**: Containerized deployment with multi-stage builds
-
-## 🎮 Commands
+## Commands
 
 All commands use the `.` prefix:
 
 ### Music Playback
+
 | Command | Description | Example |
 |---------|-------------|---------|
 | `.play <url or search>` | Play a song or add it to the queue | `.play never gonna give you up` |
@@ -43,6 +29,7 @@ All commands use the `.` prefix:
 | `.volume <0-100>` | Set playback volume (0-100%) | `.volume 75` |
 
 ### Queue Management
+
 | Command | Description | Example |
 |---------|-------------|---------|
 | `.queue list` | Show the current queue | `.queue list` |
@@ -50,6 +37,7 @@ All commands use the `.` prefix:
 | `.queue clear` | Clear the entire queue | `.queue clear` |
 
 ### General
+
 | Command | Description |
 |---------|-------------|
 | `.help` | Show available commands |
@@ -57,6 +45,7 @@ All commands use the `.` prefix:
 ## Quick Start
 
 ### Prerequisites
+
 - Python 3.13+
 - FFmpeg installed and available in PATH
 - Discord Bot Token
